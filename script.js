@@ -381,7 +381,7 @@ function initCalendar() {
       scratch(e.clientX, e.clientY);
 
       scratchPercentage = getScratchPercentage();
-      if (scratchPercentage > 99) {
+      if (scratchPercentage > 95) {
         canvas.style.display = "none";
         openDoor(day);
         isScratching = false;
@@ -414,7 +414,7 @@ function initCalendar() {
       scratch(touch.clientX, touch.clientY);
 
       scratchPercentage = getScratchPercentage();
-      if (scratchPercentage > 99) {
+      if (scratchPercentage > 95) {
         canvas.style.display = "none";
         openDoor(day);
         isScratching = false;
