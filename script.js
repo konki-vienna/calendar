@@ -1,4 +1,4 @@
-const debug = true;
+let debug = false;
 let showAllDoors = false;
 
 // Beispielbilder und Texte für jeden Tag
@@ -333,6 +333,37 @@ function initDebugControls() {
 document.getElementById("resetButton").addEventListener("click", resetCalendar);
 
 document.getElementById("modal").addEventListener("click", closeModal);
+
+// H1 Click Counter für Debug-Toggle
+let h1ClickCount = 0;
+let h1ClickTimer = null;
+
+document.querySelector("h1").addEventListener("click", () => {
+  h1ClickCount++;
+
+  if (h1ClickTimer) {
+    clearTimeout(h1ClickTimer);
+  }
+
+  h1ClickTimer = setTimeout(() => {
+    h1ClickCount = 0;
+  }, 1000);
+
+  if (h1ClickCount === 5) {
+    debug = !debug;
+    h1ClickCount = 0;
+
+    if (debug) {
+      document.querySelector(".debug-controls").classList.remove("hidden");
+      document.querySelector(".info-text").classList.remove("hidden");
+    } else {
+      document.querySelector(".debug-controls").classList.add("hidden");
+      document.querySelector(".info-text").classList.add("hidden");
+    }
+
+    console.log("Debug-Modus:", debug ? "aktiviert" : "deaktiviert");
+  }
+});
 
 // App starten
 initDebugControls();
