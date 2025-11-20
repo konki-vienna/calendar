@@ -66,6 +66,15 @@ h1 {
 
 .debug-controls label {
   font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.debug-controls input[type="checkbox"] {
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
 }
 
 .debug-controls select,
@@ -211,11 +220,11 @@ h1 {
 
 .modal-content {
   background: #006400;
-  padding: 30px;
+  padding: 0;
   border-radius: 15px;
   max-width: 600px;
   max-height: 90vh;
-  overflow: auto;
+  overflow: hidden;
   position: relative;
   color: white;
   transform: rotateY(-90deg);
@@ -240,8 +249,10 @@ h1 {
 
 .modal-content img {
   width: 100%;
-  border-radius: 10px;
-  margin-bottom: 15px;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 15px;
+  display: block;
 }
 
 @media (max-width: 768px) {
