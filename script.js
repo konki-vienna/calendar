@@ -174,7 +174,7 @@ function getCurrentDay() {
   const day = now.getDate();
 
   // Nur im Dezember (Monat 11 = Dezember, 0-basiert)
-  if (month === 11 && day >= 1 && day <= 31) {
+  if (month === 11 || (month === 10 && day >= 1 && day <= 31)) {
     return day;
   }
   // Außerhalb des Adventskalender-Zeitraums: Tag 0 (keine Türchen verfügbar)
