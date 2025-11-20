@@ -148,6 +148,19 @@ function saveDoorState(day) {
   }
 }
 
+function removeDoorState(day) {
+  try {
+    const opened = getOpenedDoors();
+    const index = opened.indexOf(day);
+    if (index > -1) {
+      opened.splice(index, 1);
+      localStorage.setItem("adventCalendar2024", JSON.stringify(opened));
+    }
+  } catch (e) {
+    console.error("Fehler beim Entfernen:", e);
+  }
+}
+
 function resetCalendar() {
   if (confirm("Möchtest du wirklich alle geöffneten Türchen zurücksetzen?")) {
     try {
@@ -293,9 +306,37 @@ function initCalendar() {
                 </div>
             `;
 
+    let clickCount = 0;
+    let clickTimer = null;
+
     door.addEventListener("click", () => {
-      if (!isLocked) {
-        openDoor(day);
+      if (isLocked && !showAllDoors) {
+        return;
+      }
+
+      clickCount++;
+
+      if (clickTimer) {
+        clearTimeout(clickTimer);
+      }
+
+      clickTimer = setTimeout(() => {
+        clickCount = 0;
+      }, 500);
+
+      if (clickCount === 1) {
+        // Erster Klick - öffnen
+        if (!isOpened && !door.classList.contains("opened")) {
+          openDoor(day);
+        }
+      } else if (clickCount === 2) {
+        // Doppelklick - schließen wenn geöffnet
+        if (isOpened || door.classList.contains("opened")) {
+          removeDoorState(day);
+          door.classList.remove("opened");
+          updateInfoText();
+        }
+        clickCount = 0;
       }
     });
 
