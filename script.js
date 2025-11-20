@@ -300,19 +300,135 @@ function initCalendar() {
     const content = doorContent.find((d) => d.day === day);
 
     door.innerHTML = `
-                <div class="door-front" data-day="${day}"></div>
+                <div class="door-front" data-day="${day}">
+                    <canvas class="scratch-canvas"></canvas>
+                </div>
                 <div class="door-back" data-day="${day}">
                     <img src="${content.image}" alt="Türchen ${day}">
                 </div>
             `;
 
+    const canvas = door.querySelector(".scratch-canvas");
+    const ctx = canvas.getContext("2d");
+    let isScratching = false;
+    let scratchPercentage = 0;
     let clickCount = 0;
     let clickTimer = null;
 
-    door.addEventListener("click", () => {
-      if (isLocked && !showAllDoors) {
-        return;
+    // Canvas initialisieren
+    const initCanvas = () => {
+      // Größe direkt vom Parent-Element nehmen
+      const rect = door.getBoundingClientRect();
+      const width = rect.width || 150;
+      const height = rect.height || 150;
+
+      canvas.width = width;
+      canvas.height = height;
+      canvas.style.width = width + "px";
+      canvas.style.height = height + "px";
+
+      // Canvas beginnt transparent - man sieht das Hintergrundbild
+      // Beim Rubbeln wird Farbe hinzugefügt
+      ctx.globalCompositeOperation = "source-over";
+    };
+
+    if (!isOpened && !showAllDoors) {
+      // Canvas nach dem Rendern initialisieren
+      setTimeout(() => initCanvas(), 0);
+    } else {
+      canvas.style.display = "none";
+    }
+
+    // Rubbel-Funktion
+    const scratch = (x, y) => {
+      const rect = canvas.getBoundingClientRect();
+      const posX = x - rect.left;
+      const posY = y - rect.top;
+
+      // Dunkelgrüner Gradient für freigerubbelte Bereiche
+      const gradient = ctx.createRadialGradient(posX, posY, 0, posX, posY, 20);
+      gradient.addColorStop(0, "rgba(0, 100, 0, 0.95)");
+      gradient.addColorStop(1, "rgba(0, 80, 0, 0.85)");
+      ctx.fillStyle = gradient;
+
+      ctx.beginPath();
+      ctx.arc(posX, posY, 20, 0, Math.PI * 2);
+      ctx.fill();
+    }; // Freigerubbelte Fläche berechnen (jetzt zählen wir nicht-transparente Pixel)
+    const getScratchPercentage = () => {
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const pixels = imageData.data;
+      let filled = 0;
+
+      for (let i = 3; i < pixels.length; i += 4) {
+        if (pixels[i] > 0) filled++; // Zähle nicht-transparente Pixel
       }
+
+      return (filled / (pixels.length / 4)) * 100;
+    };
+
+    // Mouse Events
+    canvas.addEventListener("mousedown", (e) => {
+      if (isLocked && !showAllDoors) return;
+      // Dynamische Prüfung ob Türchen geöffnet ist
+      if (door.classList.contains("opened")) return;
+      isScratching = true;
+      scratch(e.clientX, e.clientY);
+    });
+
+    canvas.addEventListener("mousemove", (e) => {
+      if (!isScratching) return;
+      scratch(e.clientX, e.clientY);
+
+      scratchPercentage = getScratchPercentage();
+      if (scratchPercentage > 99) {
+        canvas.style.display = "none";
+        openDoor(day);
+        isScratching = false;
+      }
+    });
+
+    canvas.addEventListener("mouseup", () => {
+      isScratching = false;
+    });
+
+    canvas.addEventListener("mouseleave", () => {
+      isScratching = false;
+    });
+
+    // Touch Events für Mobile
+    canvas.addEventListener("touchstart", (e) => {
+      if (isLocked && !showAllDoors) return;
+      // Dynamische Prüfung ob Türchen geöffnet ist
+      if (door.classList.contains("opened")) return;
+      e.preventDefault();
+      isScratching = true;
+      const touch = e.touches[0];
+      scratch(touch.clientX, touch.clientY);
+    });
+
+    canvas.addEventListener("touchmove", (e) => {
+      if (!isScratching) return;
+      e.preventDefault();
+      const touch = e.touches[0];
+      scratch(touch.clientX, touch.clientY);
+
+      scratchPercentage = getScratchPercentage();
+      if (scratchPercentage > 99) {
+        canvas.style.display = "none";
+        openDoor(day);
+        isScratching = false;
+      }
+    });
+
+    canvas.addEventListener("touchend", () => {
+      isScratching = false;
+    });
+
+    // Klick-Events für geöffnete Türchen
+    door.addEventListener("click", (e) => {
+      // Nur für bereits geöffnete Türchen
+      if (!isOpened && !door.classList.contains("opened")) return;
 
       clickCount++;
 
@@ -321,21 +437,29 @@ function initCalendar() {
       }
 
       clickTimer = setTimeout(() => {
+        if (clickCount === 1) {
+          // Einzelklick - Modal öffnen
+          showModal(day);
+        }
         clickCount = 0;
-      }, 500);
+      }, 300);
 
-      if (clickCount === 1) {
-        // Erster Klick - öffnen
-        if (!isOpened && !door.classList.contains("opened")) {
-          openDoor(day);
-        }
-      } else if (clickCount === 2) {
-        // Doppelklick - schließen wenn geöffnet
-        if (isOpened || door.classList.contains("opened")) {
-          removeDoorState(day);
-          door.classList.remove("opened");
-          updateInfoText();
-        }
+      if (clickCount === 2) {
+        // Doppelklick - Türchen schließen und Canvas neu initialisieren
+        clearTimeout(clickTimer);
+        removeDoorState(day);
+        door.classList.remove("opened");
+        canvas.style.display = "block";
+
+        // Canvas komplett zurücksetzen
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        initCanvas();
+
+        // Rubbel-Events wieder aktivieren
+        isScratching = false;
+        scratchPercentage = 0;
+
+        updateInfoText();
         clickCount = 0;
       }
     });
