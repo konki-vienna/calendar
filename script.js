@@ -223,17 +223,28 @@ function showModal(day) {
   const modalContent = document.getElementById("modalContent");
 
   modalContent.innerHTML = `
-            <h3>${day}. Dezember</h3>
-			<br />
-            <img src="${content.image}" alt="Türchen ${day}">
-            <p style="font-size: 1.2rem; text-align: center;">${content.text}</p>
-        `;
+    <img src="${content.image}" alt="Türchen ${day}">
+  `;
 
-  modal.classList.add("active");
+  modal.classList.remove("closing");
+  modal.style.display = "flex";
+
+  // Force reflow to trigger animation
+  modal.offsetHeight;
+
+  requestAnimationFrame(() => {
+    modal.classList.add("active");
+  });
 }
 
 function closeModal() {
-  document.getElementById("modal").classList.remove("active");
+  const modal = document.getElementById("modal");
+  modal.classList.add("closing");
+
+  setTimeout(() => {
+    modal.classList.remove("active", "closing");
+    modal.style.display = "none";
+  }, 600);
 }
 
 // Kalender initialisieren
@@ -303,13 +314,8 @@ function initDebugControls() {
 
 // Event Listeners
 document.getElementById("resetButton").addEventListener("click", resetCalendar);
-document.getElementById("modalClose").addEventListener("click", closeModal);
 
-document.getElementById("modal").addEventListener("click", (e) => {
-  if (e.target.id === "modal") {
-    closeModal();
-  }
-});
+document.getElementById("modal").addEventListener("click", closeModal);
 
 // App starten
 initDebugControls();
