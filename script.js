@@ -288,7 +288,7 @@ function initCalendar() {
 
     door.innerHTML = `
                 <div class="door-front" data-day="${day}"></div>
-                <div class="door-back">
+                <div class="door-back" data-day="${day}">
                     <img src="${content.image}" alt="Türchen ${day}">
                 </div>
             `;
