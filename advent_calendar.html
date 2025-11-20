@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adventskalender 2024</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: #1a1a2e;
+            background-image: url('https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=1600&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .debug-controls {
+            background: rgba(255,255,255,0.9);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .debug-controls label {
+            font-weight: bold;
+        }
+
+        .debug-controls select,
+        .debug-controls button {
+            padding: 8px 15px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 1rem;
+        }
+
+        .debug-controls button {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .debug-controls button:hover {
+            background: #c0392b;
+        }
+
+        .info-text {
+            background: rgba(255,255,255,0.9);
+            padding: 10px 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .door {
+            aspect-ratio: 1;
+            position: relative;
+            cursor: pointer;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: transform 0.3s;
+        }
+
+        .door:hover {
+            transform: scale(1.05);
+        }
+
+        .door.locked {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .door-front {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=1600&q=80');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: bold;
+            color: white;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            backface-visibility: hidden;
+            text-shadow: 0 0 20px rgba(0,0,0,0.8), 0 0 40px rgba(0,0,0,0.6);
+        }
+        
+        .door-front::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(201, 75, 75, 0.7) 0%, rgba(75, 19, 79, 0.7) 100%);
+            z-index: 1;
+        }
+        
+        .door-front::after {
+            content: attr(data-day);
+            position: relative;
+            z-index: 2;
+        }
+
+        .door.opened .door-front {
+            transform: rotateY(180deg);
+        }
+
+        .door-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: rotateY(180deg);
+            backface-visibility: hidden;
+            padding: 10px;
+        }
+
+        .door.opened .door-back {
+            transform: rotateY(0deg);
+        }
+
+        .door-back img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        .door-back p {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow: auto;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .modal-close:hover {
+            color: #333;
+        }
+
+        .modal-content img {
+            width: 100%;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .calendar-grid {
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+                gap: 10px;
+            }
+
+            .door-front {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎄 Adventskalender 2024 🎄</h1>
+            <p>Öffne jeden Tag ein neues Türchen!</p>
+        </header>
+
+        <div class="debug-controls">
+            <label for="daySelect">Debug-Modus:</label>
+            <select id="daySelect">
+                <option value="">Aktueller Tag</option>
+            </select>
+            <button id="resetButton">Kalender zurücksetzen</button>
+        </div>
+
+        <div class="info-text" id="infoText"></div>
+
+        <div class="calendar-grid" id="calendar"></div>
+    </div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <span class="modal-close" id="modalClose">&times;</span>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // Beispielbilder und Texte für jeden Tag
+        const doorContent = [
+            { day: 1, image: 'https://picsum.photos/400/400?random=1', text: 'Frohe Weihnachtszeit!' },
+            { day: 2, image: 'https://picsum.photos/400/400?random=2', text: 'Genieße die Adventszeit' },
+            { day: 3, image: 'https://picsum.photos/400/400?random=3', text: 'Winter Wonderland' },
+            { day: 4, image: 'https://picsum.photos/400/400?random=4', text: 'Gemütliche Stunden' },
+            { day: 5, image: 'https://picsum.photos/400/400?random=5', text: 'Nikolaus kommt bald' },
+            { day: 6, image: 'https://picsum.photos/400/400?random=6', text: 'Froher Nikolaustag!' },
+            { day: 7, image: 'https://picsum.photos/400/400?random=7', text: 'Schneeglöckchen' },
+            { day: 8, image: 'https://picsum.photos/400/400?random=8', text: 'Plätzchen backen' },
+            { day: 9, image: 'https://picsum.photos/400/400?random=9', text: 'Kerzen anzünden' },
+            { day: 10, image: 'https://picsum.photos/400/400?random=10', text: 'Heißer Kakao' },
+            { day: 11, image: 'https://picsum.photos/400/400?random=11', text: 'Winterzauber' },
+            { day: 12, image: 'https://picsum.photos/400/400?random=12', text: 'Sternschnuppen' },
+            { day: 13, image: 'https://picsum.photos/400/400?random=13', text: 'Glühwein trinken' },
+            { day: 14, image: 'https://picsum.photos/400/400?random=14', text: 'Geschenke einpacken' },
+            { day: 15, image: 'https://picsum.photos/400/400?random=15', text: 'Halbzeit!' },
+            { day: 16, image: 'https://picsum.photos/400/400?random=16', text: 'Lebkuchen genießen' },
+            { day: 17, image: 'https://picsum.photos/400/400?random=17', text: 'Weihnachtslieder' },
+            { day: 18, image: 'https://picsum.photos/400/400?random=18', text: 'Advent, Advent' },
+            { day: 19, image: 'https://picsum.photos/400/400?random=19', text: 'Noch 5 Tage' },
+            { day: 20, image: 'https://picsum.photos/400/400?random=20', text: 'Vorfreude steigt' },
+            { day: 21, image: 'https://picsum.photos/400/400?random=21', text: 'Winteranfang' },
+            { day: 22, image: 'https://picsum.photos/400/400?random=22', text: 'Fast geschafft' },
+            { day: 23, image: 'https://picsum.photos/400/400?random=23', text: 'Heiligabend morgen!' },
+            { day: 24, image: 'https://picsum.photos/400/400?random=24', text: '🎅 Frohe Weihnachten! 🎄' }
+        ];
+
+        // LocalStorage Funktionen mit Error Handling
+        function getOpenedDoors() {
+            try {
+                const stored = localStorage.getItem('adventCalendar2024');
+                return stored ? JSON.parse(stored) : [];
+            } catch (e) {
+                console.error('LocalStorage nicht verfügbar:', e);
+                return [];
+            }
+        }
+
+        function saveDoorState(day) {
+            try {
+                const opened = getOpenedDoors();
+                if (!opened.includes(day)) {
+                    opened.push(day);
+                    localStorage.setItem('adventCalendar2024', JSON.stringify(opened));
+                }
+            } catch (e) {
+                console.error('Fehler beim Speichern:', e);
+            }
+        }
+
+        function resetCalendar() {
+            if (confirm('Möchtest du wirklich alle geöffneten Türchen zurücksetzen?')) {
+                try {
+                    localStorage.removeItem('adventCalendar2024');
+                    updateInfoText('✅ Kalender wurde zurückgesetzt!');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                } catch (e) {
+                    console.error('Fehler beim Zurücksetzen:', e);
+                    updateInfoText('❌ Fehler beim Zurücksetzen');
+                }
+            }
+        }
+
+        // Aktuellen Tag ermitteln
+        function getCurrentDay() {
+            const select = document.getElementById('daySelect');
+            if (select.value) {
+                return parseInt(select.value);
+            }
+            const now = new Date();
+            const month = now.getMonth();
+            const day = now.getDate();
+            
+            // Nur im Dezember (Monat 11 = Dezember, 0-basiert)
+            if (month === 11 && day >= 1 && day <= 24) {
+                return day;
+            }
+            // Außerhalb des Adventskalender-Zeitraums: Tag 0 (keine Türchen verfügbar)
+            return 0;
+        }
+
+        function updateInfoText(message) {
+            const infoText = document.getElementById('infoText');
+            const currentDay = getCurrentDay();
+            const openedCount = getOpenedDoors().length;
+            const debugMode = document.getElementById('daySelect').value ? ' (Debug-Modus aktiv)' : '';
+            
+            if (message) {
+                infoText.textContent = message;
+            } else {
+                infoText.textContent = `📅 Aktueller Tag: ${currentDay}. Dezember${debugMode} | 🎁 Geöffnete Türchen: ${openedCount}/24`;
+            }
+        }
+
+        // Türchen öffnen
+        function openDoor(day) {
+            const currentDay = getCurrentDay();
+            
+            if (day > currentDay) {
+                alert(`Noch etwas Geduld! Dieses Türchen kann erst am ${day}. Dezember geöffnet werden.`);
+                return;
+            }
+
+            saveDoorState(day);
+            const door = document.querySelector(`[data-day="${day}"]`);
+            if (door) {
+                door.classList.add('opened');
+            }
+            
+            showModal(day);
+            updateInfoText();
+        }
+
+        // Modal anzeigen
+        function showModal(day) {
+            const content = doorContent.find(d => d.day === day);
+            const modal = document.getElementById('modal');
+            const modalContent = document.getElementById('modalContent');
+            
+            modalContent.innerHTML = `
+                <h2>Türchen ${day}</h2>
+                <img src="${content.image}" alt="Türchen ${day}">
+                <p style="font-size: 1.2rem; text-align: center;">${content.text}</p>
+            `;
+            
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        // Kalender initialisieren
+        function initCalendar() {
+            const calendar = document.getElementById('calendar');
+            calendar.innerHTML = ''; // Vorherigen Inhalt löschen
+            
+            const openedDoors = getOpenedDoors();
+            const currentDay = getCurrentDay();
+
+            // Türchen in zufälliger Reihenfolge anzeigen
+            const days = Array.from({length: 24}, (_, i) => i + 1);
+            days.sort(() => Math.random() - 0.5);
+
+            days.forEach(day => {
+                const door = document.createElement('div');
+                door.className = 'door';
+                door.dataset.day = day;
+                
+                const isOpened = openedDoors.includes(day);
+                const isLocked = day > currentDay;
+                
+                if (isOpened) {
+                    door.classList.add('opened');
+                }
+                if (isLocked) {
+                    door.classList.add('locked');
+                }
+
+                const content = doorContent.find(d => d.day === day);
+                
+                door.innerHTML = `
+                    <div class="door-front" data-day="${day}"></div>
+                    <div class="door-back">
+                        <img src="${content.image}" alt="Türchen ${day}">
+                    </div>
+                `;
+
+                door.addEventListener('click', () => {
+                    if (!isLocked) {
+                        openDoor(day);
+                    }
+                });
+
+                calendar.appendChild(door);
+            });
+
+            updateInfoText();
+        }
+
+        // Debug-Dropdown initialisieren
+        function initDebugControls() {
+            const select = document.getElementById('daySelect');
+            select.innerHTML = '<option value="">Aktueller Tag</option>';
+            
+            for (let i = 1; i <= 24; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = `${i}. Dezember`;
+                select.appendChild(option);
+            }
+
+            select.addEventListener('change', () => {
+                initCalendar(); // Kalender neu laden ohne Page Reload
+            });
+        }
+
+        // Event Listeners
+        document.getElementById('resetButton').addEventListener('click', resetCalendar);
+        document.getElementById('modalClose').addEventListener('click', closeModal);
+        
+        document.getElementById('modal').addEventListener('click', (e) => {
+            if (e.target.id === 'modal') {
+                closeModal();
+            }
+        });
+
+        // App starten
+        initDebugControls();
+        initCalendar();
+    </script>
+</body>
+</html>
