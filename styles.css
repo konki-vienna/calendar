@@ -178,7 +178,6 @@ h1 {
   justify-content: center;
   transform: rotateY(180deg);
   backface-visibility: hidden;
-  padding: 10px;
 }
 
 .door.opened .door-back {
