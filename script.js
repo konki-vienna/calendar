@@ -222,9 +222,14 @@ function showModal(day) {
   const modal = document.getElementById("modal");
   const modalContent = document.getElementById("modalContent");
 
-  modalContent.innerHTML = `
-    <img src="${content.image}" alt="Türchen ${day}">
-  `;
+  modalContent.innerHTML = `<img src="${content.image}" alt="Türchen ${day}">`;
+
+  //   modalContent.innerHTML = `
+  //             <h3>${day}. Dezember</h3>
+  // 			<br />
+  //             <img src="${content.image}" alt="Türchen ${day}">
+  //             <p style="font-size: 1.2rem; text-align: center;">${content.text}</p>
+  //         `;
 
   modal.classList.remove("closing");
   modal.style.display = "flex";
