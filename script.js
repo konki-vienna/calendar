@@ -194,6 +194,23 @@ function getCurrentDay() {
   return 0;
 }
 
+function updateDebugDateInfo() {
+  const debugDateInfo = document.getElementById("debugDateInfo");
+  if (!debugDateInfo) return;
+
+  const systemDate = new Date();
+  const systemDay = systemDate.getDate();
+  const systemMonth = systemDate.getMonth() + 1;
+  const systemYear = systemDate.getFullYear();
+
+  const websiteDay = getCurrentDay();
+
+  debugDateInfo.innerHTML = `
+    <strong>Systemdatum:</strong> ${systemDay}.${systemMonth}.${systemYear}<br>
+    <strong>Website-Tag:</strong> ${websiteDay}. Dezember
+  `;
+}
+
 function updateInfoText(message) {
   const infoText = document.getElementById("infoText");
   const currentDay = getCurrentDay();
@@ -207,6 +224,9 @@ function updateInfoText(message) {
   } else {
     infoText.textContent = `📅 Aktueller Tag: ${currentDay}. Dezember${debugMode} | 🎁 Geöffnete Türchen: ${openedCount}/24`;
   }
+
+  // Debug-Datumsinfo aktualisieren
+  updateDebugDateInfo();
 }
 
 // Türchen öffnen
@@ -498,6 +518,13 @@ function initDebugControls() {
 document.getElementById("resetButton").addEventListener("click", resetCalendar);
 
 document.getElementById("modal").addEventListener("click", closeModal);
+
+// Datum überprüfen Button
+document.getElementById("dateCheckButton").addEventListener("click", () => {
+  initCalendar();
+  updateInfoText();
+  alert("Datum wurde aktualisiert!");
+});
 
 // H1 Click Counter für Debug-Toggle
 let h1ClickCount = 0;

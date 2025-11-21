@@ -106,6 +106,42 @@ h1 {
   font-size: 0.9rem;
 }
 
+.date-check-container {
+  text-align: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.date-check-button {
+  background: #27ae60;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  font-size: 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: background 0.3s, transform 0.2s;
+}
+
+.date-check-button:hover {
+  background: #229954;
+  transform: translateY(-2px);
+}
+
+.date-check-button:active {
+  transform: translateY(0);
+}
+
+.debug-date-info {
+  margin-top: 15px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 5px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
