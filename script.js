@@ -369,11 +369,8 @@ function initCalendar() {
       const posX = x - rect.left;
       const posY = y - rect.top;
 
-      // Dunkelgrüner Gradient für freigerubbelte Bereiche
-      const gradient = ctx.createRadialGradient(posX, posY, 0, posX, posY, 20);
-      gradient.addColorStop(0, "rgba(0, 100, 0, 0.95)");
-      gradient.addColorStop(1, "rgba(0, 80, 0, 0.85)");
-      ctx.fillStyle = gradient;
+      // Einfarbig dunkelgrün für freigerubbelte Bereiche
+      ctx.fillStyle = "rgba(0, 100, 0, 0.95)";
 
       ctx.beginPath();
       ctx.arc(posX, posY, 20, 0, Math.PI * 2);
