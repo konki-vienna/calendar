@@ -1,6 +1,6 @@
 let debug = false;
 let showAllDoors = false;
-const novemberTestEndDate = 28; // Letzter Tag im November für Tests
+const novemberTestEndDate = 27; // Letzter Tag im November für Tests
 
 // Beispielbilder und Texte für jeden Tag
 const doorContent = [
@@ -198,6 +198,27 @@ function getCurrentDay() {
   return 0;
 }
 
+function getWebsiteMonth() {
+  const select = document.getElementById("daySelect");
+  if (select.value === "") {
+    // 'Aktueller Tag' gewählt: aktuelles Monat anzeigen
+    const now = new Date();
+    const month = now.getMonth();
+    if (month === 10) return "November";
+    if (month === 11) return "Dezember";
+    return "-";
+  } else if (select.value) {
+    // Ein bestimmter Tag gewählt: immer Dezember anzeigen
+    return "Dezember";
+  }
+  // Fallback: aktuelles Monat
+  const now = new Date();
+  const month = now.getMonth();
+  if (month === 10) return "November";
+  if (month === 11) return "Dezember";
+  return "-";
+}
+
 function updateDebugDateInfo() {
   const debugDateInfo = document.getElementById("debugDateInfo");
   if (!debugDateInfo) return;
@@ -208,10 +229,12 @@ function updateDebugDateInfo() {
   const systemYear = systemDate.getFullYear();
 
   const websiteDay = getCurrentDay();
-
+  const websiteMonth = getWebsiteMonth();
   debugDateInfo.innerHTML = `
     <strong>Systemdatum:</strong> ${systemDay}.${systemMonth}.${systemYear}<br>
-    <strong>Website-Tag:</strong> ${websiteDay}. Dezember
+    <strong>Website-Tag:</strong> ${
+      websiteDay === 0 ? systemDay : websiteDay
+    }. ${websiteDay === 0 ? systemMonth : websiteMonth}
   `;
 }
 
@@ -222,13 +245,19 @@ function updateInfoText(message) {
   const debugMode = document.getElementById("daySelect").value
     ? " (Debug-Modus aktiv)"
     : "";
-
+  const websiteMonth = getWebsiteMonth();
+  let tagAnzeige = currentDay;
+  let monatAnzeige = websiteMonth;
+  if (currentDay === 0) {
+    const now = new Date();
+    tagAnzeige = now.getDate();
+    monatAnzeige = now.getMonth() + 1;
+  }
   if (message) {
     infoText.textContent = message;
   } else {
-    infoText.textContent = `📅 Aktueller Tag: ${currentDay}. Dezember${debugMode} | 🎁 Geöffnete Türchen: ${openedCount}/24`;
+    infoText.textContent = `📅 Aktueller Tag: ${tagAnzeige}. ${monatAnzeige}${debugMode} | 🎁 Geöffnete Türchen: ${openedCount}/24`;
   }
-
   // Debug-Datumsinfo aktualisieren
   updateDebugDateInfo();
 }
@@ -309,6 +338,12 @@ function initCalendar() {
     door.className = "door";
     door.dataset.day = day;
 
+    // Zufällige Farbe für dieses Fenster generieren
+    const r = Math.floor(Math.random() * 256);
+    const g = Math.floor(Math.random() * 256);
+    const b = Math.floor(Math.random() * 256);
+    const rubColor = `rgba(${r},${g},${b},0.95)`;
+
     const isOpened = openedDoors.includes(day);
     const isLocked = day > currentDay;
 
@@ -325,15 +360,17 @@ function initCalendar() {
 
     door.innerHTML = `
                 <div class="door-front" data-day="${day}">
-                    <canvas class="scratch-canvas"></canvas>
+                  <canvas class="scratch-canvas"></canvas>
                 </div>
                 <div class="door-back" data-day="${day}">
-                    <img src="${content.image}" alt="Türchen ${day}">
+                  <img src="${content.image}" alt="Türchen ${day}">
                 </div>
-            `;
+              `;
 
     const canvas = door.querySelector(".scratch-canvas");
     const ctx = canvas.getContext("2d");
+    // Speichere die Rubbel-Farbe als Property am Canvas
+    canvas.rubColor = rubColor;
     let isScratching = false;
     let scratchPercentage = 0;
     let clickCount = 0;
@@ -369,8 +406,8 @@ function initCalendar() {
       const posX = x - rect.left;
       const posY = y - rect.top;
 
-      // Einfarbig dunkelgrün für freigerubbelte Bereiche
-      ctx.fillStyle = "rgba(0, 100, 0, 0.95)";
+      // Immer die für dieses Fenster generierte Farbe verwenden
+      ctx.fillStyle = canvas.rubColor;
 
       ctx.beginPath();
       ctx.arc(posX, posY, 20, 0, Math.PI * 2);
