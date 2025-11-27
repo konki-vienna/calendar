@@ -1,5 +1,6 @@
 let debug = false;
 let showAllDoors = false;
+const novemberTestEndDate = 28; // Letzter Tag im November für Tests
 
 // Beispielbilder und Texte für jeden Tag
 const doorContent = [
@@ -187,7 +188,10 @@ function getCurrentDay() {
   const day = now.getDate();
 
   // Nur im Dezember (Monat 11 = Dezember, 0-basiert)
-  if (month === 11 || (month === 10 && day >= 1 && day <= 31)) {
+  if (
+    month === 11 ||
+    (month === 10 && day >= 1 && day <= novemberTestEndDate)
+  ) {
     return day;
   }
   // Außerhalb des Adventskalender-Zeitraums: Tag 0 (keine Türchen verfügbar)
@@ -513,6 +517,19 @@ function initDebugControls() {
     initCalendar();
   });
 }
+
+// Disclaimer aktualisieren
+function updateDisclaimer() {
+  const disclaimer = document.getElementById("disclaimer");
+  if (disclaimer) {
+    disclaimer.textContent = `Works from Nov. 1st - Nov. ${novemberTestEndDate}th and the entire December`;
+  }
+}
+
+// Nach dem Laden der Seite Disclaimer setzen
+window.addEventListener("DOMContentLoaded", () => {
+  updateDisclaimer();
+});
 
 // Event Listeners
 document.getElementById("resetButton").addEventListener("click", resetCalendar);
