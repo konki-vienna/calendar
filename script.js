@@ -1,6 +1,6 @@
 let debug = false;
 let showAllDoors = false;
-const novemberTestEndDate = 25; // Letzter Tag im November für Tests
+const novemberTestEndDate = 27; // Letzter Tag im November für Tests
 
 // Beispielbilder und Texte für jeden Tag
 const doorContent = [
