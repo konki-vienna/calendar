@@ -1,6 +1,6 @@
 let debug = false;
 let showAllDoors = false;
-const novemberTestEndDate = 27; // Letzter Tag im November für Tests
+const novemberTestEndDate = 25; // Letzter Tag im November für Tests
 
 // Beispielbilder und Texte für jeden Tag
 const doorContent = [
@@ -556,7 +556,7 @@ function initDebugControls() {
 function updateDisclaimer() {
   const disclaimer = document.getElementById("disclaimer");
   if (disclaimer) {
-    disclaimer.textContent = `Works from Nov. 1st - Nov. ${novemberTestEndDate}th and the entire December`;
+    disclaimer.textContent = `Funktioniert vom 1. November - ${novemberTestEndDate}. November und den gesamten Dezember. Viel Spaß beim Rubbbeln! 🎄`;
   }
 }
 
