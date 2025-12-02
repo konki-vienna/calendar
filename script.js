@@ -321,6 +321,23 @@ function closeModal() {
   }, 600);
 }
 
+// Türchen-Reihenfolge aus LocalStorage holen oder neu generieren
+function getDoorOrder() {
+  try {
+    const stored = localStorage.getItem("adventCalendarOrder");
+    if (stored) return JSON.parse(stored);
+    // Falls nicht vorhanden, neu generieren und speichern
+    const days = Array.from({ length: 24 }, (_, i) => i + 1);
+    days.sort(() => Math.random() - 0.5);
+    localStorage.setItem("adventCalendarOrder", JSON.stringify(days));
+    return days;
+  } catch (e) {
+    console.error("LocalStorage nicht verfügbar:", e);
+    // Fallback: Standardreihenfolge
+    return Array.from({ length: 24 }, (_, i) => i + 1);
+  }
+}
+
 // Kalender initialisieren
 function initCalendar() {
   const calendar = document.getElementById("calendar");
@@ -329,9 +346,8 @@ function initCalendar() {
   const openedDoors = getOpenedDoors();
   const currentDay = getCurrentDay();
 
-  // Türchen in zufälliger Reihenfolge anzeigen
-  const days = Array.from({ length: 24 }, (_, i) => i + 1);
-  days.sort(() => Math.random() - 0.5);
+  // Türchen in gespeicherter Reihenfolge anzeigen
+  const days = getDoorOrder();
 
   days.forEach((day) => {
     const door = document.createElement("div");
